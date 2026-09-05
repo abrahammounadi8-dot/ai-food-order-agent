@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Food Order Agent</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; margin: 0; }
+    main { max-width: 760px; margin: 40px auto; padding: 24px; border: 1px solid #333; border-radius: 12px; background: #1a1a1a; }
+    h1 { margin-top: 0; }
+    textarea { width: 100%; min-height: 130px; margin: 12px 0; border-radius: 8px; border: 1px solid #444; padding: 12px; background: #0f0f0f; color: #fff; }
+    button { width: 100%; background: #ff7a00; color: #fff; border: 0; border-radius: 8px; padding: 12px; font-weight: 700; cursor: pointer; }
+    #response { margin-top: 16px; padding: 14px; background: #121212; border: 1px solid #333; border-radius: 8px; white-space: pre-wrap; display: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>🍔 AI Food Order Agent</h1>
+    <p>Escribe tu pedido en lenguaje natural y el agente te responderá.</p>
+    <textarea id="order" placeholder="Ejemplo: Quiero un menú de hamburguesa de pollo con patatas y bebida."></textarea>
+    <button id="send">Enviar pedido</button>
+    <div id="response"></div>
+  </main>
+
+  <script>
+    const sendButton = document.getElementById("send");
+    const orderField = document.getElementById("order");
+    const responseBox = document.getElementById("response");
+
+    sendButton.addEventListener("click", async () => {
+      const order = orderField.value.trim();
+      responseBox.style.display = "block";
+
+      if (!order) {
+        responseBox.textContent = "Por favor, escribe un pedido.";
+        return;
+      }
+
+      responseBox.textContent = "Procesando pedido...";
+
+      try {
+        const res = await fetch("/api/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          responseBox.textContent = data.error || "Error procesando pedido.";
+          return;
+        }
+
+        responseBox.textContent = data.result;
+      } catch (_error) {
+        responseBox.textContent = "No se pudo conectar con el servidor.";
+      }
+    });
+  </script>
+</body>
+</html>
