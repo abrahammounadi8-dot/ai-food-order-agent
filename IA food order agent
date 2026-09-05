@@ -104,6 +104,12 @@
       opacity: 0.92;
     }
 
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+      transform: none;
+    }
+
     #response {
       margin-top: 20px;
       padding: 18px;
@@ -169,7 +175,7 @@
         placeholder="Example: I want a large chicken burger meal with fries and a Coke..."
       ></textarea>
 
-      <button onclick="createOrder()">
+      <button id="submitBtn" onclick="createOrder()">
         Ask AI Agent
       </button>
 
@@ -191,29 +197,56 @@
   </main>
 
   <script>
-    function createOrder() {
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
+    async function createOrder() {
       const orderInput = document.getElementById("order");
       const response = document.getElementById("response");
-
+      const submitBtn = document.getElementById("submitBtn");
       const order = orderInput.value.trim();
 
       if (!order) {
         response.style.display = "block";
-        response.innerHTML =
-          "🍽️ Tell me what you would like to eat first.";
+        response.innerHTML = "🍽️ Tell me what you would like to eat first.";
         return;
       }
 
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Thinking...";
       response.style.display = "block";
+      response.innerHTML = "⏳ Processing your order with AI...";
 
-      response.innerHTML = `
-        <strong>🤖 AI Agent received your order:</strong>
-        <br><br>
-        "${order}"
-        <br><br>
-        Next step: connect the agent to restaurants and ordering APIs.
-      `;
+      try {
+        const result = await fetch("/api/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order })
+        });
+
+        const data = await result.json();
+
+        if (!result.ok) {
+          throw new Error(data.error || "Failed to process order.");
+        }
+
+        response.innerHTML = `
+          <strong>🤖 AI Agent response:</strong>
+          <br><br>
+          ${escapeHtml(data.reply).replace(/\n/g, "<br>")}
+        `;
+      } catch (error) {
+        response.innerHTML = `❌ ${escapeHtml(error.message || "Unknown error.")}`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Ask AI Agent";
+      }
     }
   </script>
 
