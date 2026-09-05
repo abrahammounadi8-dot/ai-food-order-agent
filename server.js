@@ -15,16 +15,12 @@ const rateLimitStore = new Map();
 
 app.use(express.json({ limit: "16kb" }));
 
-app.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "IA food order agent"));
-});
-
-function checkRateLimit(ip) {
+function checkRateLimit(key) {
   const now = Date.now();
-  const existing = rateLimitStore.get(ip) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  const existing = rateLimitStore.get(key) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
 
   if (now > existing.resetAt) {
-    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
     return false;
   }
 
@@ -33,12 +29,14 @@ function checkRateLimit(ip) {
   }
 
   existing.count += 1;
-  rateLimitStore.set(ip, existing);
+  rateLimitStore.set(key, existing);
   return false;
 }
 
 app.post("/api/order", async (req, res) => {
-  if (checkRateLimit(req.ip || "unknown")) {
+  const requesterIp = req.ip || "unknown";
+
+  if (checkRateLimit(`${requesterIp}:api`)) {
     return res.status(429).json({
       error: "Too many requests. Please wait a moment before trying again."
     });
@@ -92,6 +90,15 @@ app.post("/api/order", async (req, res) => {
   }
 });
 
+app.get("/", (req, res) => {
+  const requesterIp = req.ip || "unknown";
+
+  if (checkRateLimit(`${requesterIp}:ui`)) {
+    return res.status(429).send("Too many requests. Please wait a moment before refreshing.");
+  }
+
+  return res.sendFile(path.join(__dirname, "IA food order agent"));
+});
 app.listen(PORT, () => {
   console.log(`AI Food Order Agent listening on http://localhost:${PORT}`);
 });
