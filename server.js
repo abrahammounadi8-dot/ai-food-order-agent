@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
 const OpenAI = require("openai");
+const rateLimit = require("express-rate-limit");
 
 dotenv.config();
 
@@ -10,6 +11,14 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+  }),
+);
 
 function buildFallback(orderText) {
   return `✅ Pedido recibido: "${orderText}".\n\nSugerencia rápida:\n- Revisar restaurante disponible\n- Confirmar precio y tiempo estimado\n- Finalizar pago`;
