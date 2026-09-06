@@ -1,0 +1,24 @@
+{
+  "name": "ai-food-order-agent",
+  "version": "1.0.0",
+  "description": "AI food order agent with OpenAI-backed order interpretation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests configured\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://localhost:26831/abrahammounadi8-dot/ai-food-order-agent"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "openai": "^7.10.0"
+  }
+}
