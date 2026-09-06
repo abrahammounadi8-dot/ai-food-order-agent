@@ -230,7 +230,10 @@
           body: JSON.stringify({ order })
         });
 
-        const data = await result.json();
+        const contentType = result.headers.get("content-type") || "";
+        const data = contentType.includes("application/json")
+          ? await result.json()
+          : { error: (await result.text()) || "Failed to process order." };
 
         if (!result.ok) {
           throw new Error(data.error || "Failed to process order.");
