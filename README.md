@@ -1,4 +1,4 @@
-# ai-food-order-agent
+# AI Food Ordering Agent
 
 Simple AI food ordering MVP with a static frontend and an Express backend that calls OpenAI.
 
