@@ -82,8 +82,8 @@ app.post("/api/order", apiLimiter, async (req, res) => {
 });
 
 app.get("/", uiLimiter, (_req, res) => {
-  return res.sendFile(path.join(__dirname, "IA food order agent"));
+  return res.sendFile(path.join(__dirname, "index.html"));
 });
 app.listen(PORT, () => {
-  console.log(`AI Food Order Agent listening on http://localhost:${PORT}`);
+  console.log(`AI Food Ordering Agent listening on http://localhost:${PORT}`);
 });
